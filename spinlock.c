@@ -3,6 +3,7 @@
 #include <urcu.h>
 #include <stdio.h>
 #include <limits.h>
+#include <time.h>
 
 #define MAX INT_MAX
 
@@ -14,23 +15,27 @@ struct foo {
 struct foo *gl;
 int done = 0;
 pthread_t tid[3];
+pthread_spinlock_t spin;
+// amount of reads
+long reads = 0;
 
 void *updater(void *args)
 {
 	struct foo *x;
 	struct foo *old;
 
-	for (int i = 0 ; i < MAX-10; i++) {
+
+	for (int i = 0 ; i < INT_MAX; i++) {
 		x = malloc(sizeof(struct foo));
 		x->a = i;
 		x->b = i+1;
 		old = gl;
+		pthread_spin_lock(&spin);
 		gl = x;
-		printf(".");
+		pthread_spin_unlock(&spin);
 		free(old);
 	}
 
-	free(x);
 	done = 1;
 
 }
@@ -38,16 +43,32 @@ void *updater(void *args)
 void *reader(void *args)
 {
 	while (!done){
-		int a = gl->a;
-		int b = gl->b;
+		int a, b;
+		pthread_spin_lock(&spin);
+		a =  gl->a;
+		b =  gl->b;
+		pthread_spin_unlock(&spin);
 		if (b - a != 1){
-			printf("\nWrong update: %d %d\n", a, b );
+			printf("\nWrong update: %d %d\n", b, a);
 			pthread_cancel(tid[0]);
 			break;
 		}
+		reads++;
 	}
 }
 
+
+void *timer(void *args){
+	struct timespec ts, ts2;
+	timespec_get(&ts, TIME_UTC);
+	while (!done){
+		sleep(1);
+		timespec_get(&ts2, TIME_UTC);
+		time_t sec = ts2.tv_sec - ts.tv_sec;
+		printf("%d reads/sec\n", reads/sec);
+
+	}
+}
 
 int main(){
 	int err;
@@ -61,6 +82,7 @@ int main(){
 
 	err = pthread_create(&tid[0], NULL, &updater, NULL);
 	err = pthread_create(&tid[1], NULL, &reader, NULL);
+	err = pthread_create(&tid[2], NULL, &timer, NULL);
 
 	if (err){
 		perror("Thread error\n");
@@ -69,5 +91,6 @@ int main(){
 
 	pthread_join(tid[0], NULL);
 	pthread_join(tid[1], NULL);
+	pthread_join(tid[2], NULL);
 	return 0;
 }

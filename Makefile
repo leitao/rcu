@@ -1,4 +1,5 @@
 all:
-	gcc -g example1.c -o example1 -lurcu -lpthread
-	gcc -g example2.c -o example2 -lurcu -lpthread
+	gcc -g problem.c -o problem -lpthread
+	gcc -g rcu.c -o rcu -lurcu -lpthread
 	gcc -g mutex.c -o mutex -lurcu -lpthread
+	gcc -g spinlock.c -o spinlock -lurcu -lpthread
