@@ -27,7 +27,6 @@ void *updater(void *args)
 		x->b = i+1;
 		old = gl;
 		rcu_assign_pointer(gl, x);
-		printf(".");
 		synchronize_rcu();
 		free(old);
 	}
