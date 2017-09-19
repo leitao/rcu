@@ -45,10 +45,11 @@ void *reader(void *args)
 int main(){
 	int err;
 
+	printf("read tid is %d and updater tid is %d\n", tid[0], tid[1]);
+
 	err = pthread_create(&tid[0], NULL, &updater, NULL);
 	err = pthread_create(&tid[1], NULL, &reader, NULL);
 
-	printf("read tid is %d and updater tid is %d\n", tid[0], tid[1]);
 
 
 	if (err){
