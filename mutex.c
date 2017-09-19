@@ -19,6 +19,8 @@ pthread_mutex_t mutex;
 // amount of reads
 long reads = 0;
 
+extern void *timer(void *args);
+
 void *updater(void *args)
 {
 	struct foo *x;
@@ -57,18 +59,6 @@ void *reader(void *args)
 	}
 }
 
-
-void *timer(void *args){
-	struct timespec ts, ts2;
-	timespec_get(&ts, TIME_UTC);
-	while (!done){
-		sleep(1);
-		timespec_get(&ts2, TIME_UTC);
-		time_t sec = ts2.tv_sec - ts.tv_sec;
-		printf("%d reads/sec\n", reads/sec);
-
-	}
-}
 
 int main(){
 	int err;
