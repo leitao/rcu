@@ -11,17 +11,20 @@ struct foo {
 	int b;
 };
 
-struct foo gl;
+struct foo *gl;
 int done = 0;
 pthread_t tid[3];
 
 void *updater(void *args)
 {
-	struct foo x;
+	struct foo *x;
+
+	x = malloc(sizeof(struct foo));
+
 	for (int i = 0 ; i < MAX-10; i++) {
-		x.a = i;
-		x.b = i+1;
-		gl = x;
+		x->a = i;
+		x->b = i+1;
+		*gl = *x;
 		printf(".");
 	}
 	done = 1;
@@ -31,8 +34,8 @@ void *updater(void *args)
 void *reader(void *args)
 {
 	while (!done){
-		int a = gl.a;
-		int b = gl.b;
+		int a = gl->a;
+		int b = gl->b;
 		if (b - a != 1){
 			printf("\nWrong update: %d %d\n", a, b );
 			pthread_cancel(tid[0]);
@@ -44,6 +47,11 @@ void *reader(void *args)
 
 int main(){
 	int err;
+
+	// Initing gl
+	gl = malloc(sizeof(struct foo));
+	gl->a = 1;
+	gl->b = 2;
 
 	printf("read tid is %d and updater tid is %d\n", tid[0], tid[1]);
 
