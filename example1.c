@@ -18,15 +18,19 @@ pthread_t tid[3];
 void *updater(void *args)
 {
 	struct foo *x;
-
-	x = malloc(sizeof(struct foo));
+	struct foo *old;
 
 	for (int i = 0 ; i < MAX-10; i++) {
+		x = malloc(sizeof(struct foo));
 		x->a = i;
 		x->b = i+1;
-		*gl = *x;
+		old = gl;
+		gl = x;
 		printf(".");
+		free(gl);
 	}
+
+	free(x);
 	done = 1;
 
 }
@@ -57,8 +61,6 @@ int main(){
 
 	err = pthread_create(&tid[0], NULL, &updater, NULL);
 	err = pthread_create(&tid[1], NULL, &reader, NULL);
-
-
 
 	if (err){
 		perror("Thread error\n");
