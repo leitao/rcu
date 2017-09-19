@@ -27,7 +27,7 @@ void *updater(void *args)
 		old = gl;
 		gl = x;
 		printf(".");
-		free(gl);
+		free(old);
 	}
 
 	free(x);

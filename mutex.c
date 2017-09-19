@@ -30,7 +30,7 @@ void *updater(void *args)
 		pthread_mutex_lock(&mutex);
 		gl = x;
 		pthread_mutex_unlock(&mutex);
-		free(gl);
+		free(old);
 	}
 
 	free(x);
@@ -41,12 +41,13 @@ void *updater(void *args)
 void *reader(void *args)
 {
 	while (!done){
-		int c;
+		int a, b;
 		pthread_mutex_lock(&mutex);
-		c = gl->b - gl->a;
+		a =  gl->a;
+		b =  gl->b;
 		pthread_mutex_unlock(&mutex);
-		if (c != 1){
-			printf("\nWrong update: %d %d\n", gl->a, gl->b );
+		if (b - a != 1){
+			printf("\nWrong update: %d %d\n", b, a);
 			pthread_cancel(tid[0]);
 			break;
 		}
