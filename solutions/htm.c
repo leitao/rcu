@@ -56,6 +56,7 @@ void *reader(void *args)
 		if (b - a != 1){
 			printf("\nWrong update: %d %d\n", b, a);
 			pthread_cancel(tid[0]);
+			done = 1;
 			break;
 		}
 		reads++;

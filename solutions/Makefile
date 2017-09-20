@@ -1,5 +1,4 @@
 all:
-	gcc -Wall -g problem.c -o problem -lpthread
 	gcc -Wall -g misc.c rcu.c -o rcu -lurcu -lpthread
 	gcc -Wall -g misc.c mutex.c -o mutex -lurcu -lpthread
 	gcc -Wall -g misc.c spinlock.c -o spinlock -lurcu -lpthread
