@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <time.h>
-#include <htmintrin.h>
-#include <semaphore.h>
 
 #define MAX INT_MAX
 
@@ -16,10 +14,10 @@ struct foo {
 
 struct foo *gl;
 int done = 0;
-pthread_t tid[3];
+pthread_t tid[4];
+pthread_spinlock_t spin;
 // amount of reads
 long reads = 0;
-sem_t sem;
 
 extern void *timer(void *args);
 
@@ -28,14 +26,15 @@ void *updater(void *args)
 	struct foo *x;
 	struct foo *old;
 
+
 	for (int i = 0 ; i < INT_MAX; i++) {
 		x = malloc(sizeof(struct foo));
 		x->a = i;
 		x->b = i+1;
 		old = gl;
-		sem_wait(&sem);
+		pthread_spin_lock(&spin);
 		gl = x;
-		sem_post(&sem);
+		pthread_spin_unlock(&spin);
 		free(old);
 	}
 
@@ -46,12 +45,12 @@ void *updater(void *args)
 
 void *reader(void *args)
 {
-	int a, b;
 	while (!done){
-		sem_wait(&sem);
-			a =  gl->a;
-			b =  gl->b;
-		sem_post(&sem);
+		int a, b;
+		pthread_spin_lock(&spin);
+		a =  gl->a;
+		b =  gl->b;
+		pthread_spin_unlock(&spin);
 		if (b - a != 1){
 			printf("\nWrong update: %d %d\n", b, a);
 			pthread_cancel(tid[0]);
@@ -67,7 +66,6 @@ void *reader(void *args)
 int main(){
 	int err;
 
-	sem_init(&sem, 0, 1);
 	// Initing gl
 	gl = malloc(sizeof(struct foo));
 	gl->a = 1;
@@ -75,7 +73,8 @@ int main(){
 
 	err = pthread_create(&tid[0], NULL, &updater, NULL);
 	err = pthread_create(&tid[1], NULL, &reader, NULL);
-	err = pthread_create(&tid[2], NULL, &timer, NULL);
+	err = pthread_create(&tid[2], NULL, &reader, NULL);
+	err = pthread_create(&tid[3], NULL, &timer, NULL);
 
 	if (err){
 		perror("Thread error\n");
@@ -85,5 +84,6 @@ int main(){
 	pthread_join(tid[0], NULL);
 	pthread_join(tid[1], NULL);
 	pthread_join(tid[2], NULL);
+	pthread_join(tid[3], NULL);
 	return 0;
 }

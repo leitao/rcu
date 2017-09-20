@@ -40,6 +40,8 @@ void *updater(void *args)
 
 	done = 1;
 
+	return NULL;
+
 }
 
 void *reader(void *args)
@@ -57,6 +59,8 @@ void *reader(void *args)
 		}
 		reads++;
 	}
+
+	return NULL;
 }
 
 
@@ -67,8 +71,6 @@ int main(){
 	gl = malloc(sizeof(struct foo));
 	gl->a = 1;
 	gl->b = 2;
-
-	printf("read tid is %d and updater tid is %d\n", tid[0], tid[1]);
 
 	err = pthread_create(&tid[0], NULL, &updater, NULL);
 	err = pthread_create(&tid[1], NULL, &reader, NULL);

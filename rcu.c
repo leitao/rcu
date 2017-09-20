@@ -37,6 +37,8 @@ void *updater(void *args)
 	free(x);
 	done = 1;
 
+	return NULL;
+
 }
 
 void *reader(void *args)
@@ -59,6 +61,8 @@ void *reader(void *args)
 	}
 
 	rcu_unregister_thread();
+
+	return NULL;
 }
 
 int main(){
@@ -71,8 +75,6 @@ int main(){
 
 	// Init RCU
 	rcu_init();
-
-	printf("read tid is %d and updater tid is %d\n", tid[0], tid[1]);
 
 	err = pthread_create(&tid[0], NULL, &updater, NULL);
 	err = pthread_create(&tid[1], NULL, &reader, NULL);
