@@ -5,6 +5,8 @@ all:
 	gcc -g misc.c spinlock.c -o spinlock -lurcu -lpthread
 	gcc -g misc.c spinlock_parallel.c -o spinlock_parallel -lurcu -lpthread
 	gcc -g misc.c rcu_parallel.c -o rcu_parallel -lurcu -lpthread
+	gcc -g misc.c htm.c -o htm -lurcu -lpthread
+	gcc -g misc.c sem.c -o sem -lurcu -lpthread
 
 clean:
-	rm -fr problem rcu mutex spinlock spinlock_parallel rcu_parallel
+	rm -fr problem rcu mutex spinlock spinlock_parallel rcu_parallel perf.data\*
